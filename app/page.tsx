@@ -10,6 +10,7 @@ type CampaignMetrics = {
   clicks: number;
   merchants: number;
   conversions: number;
+  gpvPositive: number;
 };
 
 type Campaign = {
@@ -29,8 +30,8 @@ const CAMPAIGNS: Campaign[] = [
     name: 'Configuración Mercado Pago',
     url: '/admin/settings/payments · evento PN_Trigger_MP',
     color: '#0050c3',
-    all: { views: 9114, uniqueViews: 9017, clicks: 3832, merchants: 8986, conversions: 758 },
-    last30: { views: 3717, uniqueViews: 3710, clicks: 1553, merchants: 3707, conversions: 229 },
+    all: { views: 9114, uniqueViews: 9017, clicks: 3832, merchants: 8986, conversions: 631, gpvPositive: 613 },
+    last30: { views: 3717, uniqueViews: 3710, clicks: 1553, merchants: 3707, conversions: 205, gpvPositive: 198 },
   },
   {
     id: 'pp',
@@ -38,8 +39,8 @@ const CAMPAIGNS: Campaign[] = [
     name: 'Configuración Pagos Personalizados',
     url: '/admin/settings/payments · evento PN_Trigger_PP',
     color: '#00b4e6',
-    all: { views: 4069, uniqueViews: 3988, clicks: 1019, merchants: 3982, conversions: 319 },
-    last30: { views: 1656, uniqueViews: 1653, clicks: 412, merchants: 1647, conversions: 100 },
+    all: { views: 4069, uniqueViews: 3988, clicks: 1019, merchants: 3982, conversions: 246, gpvPositive: 242 },
+    last30: { views: 1656, uniqueViews: 1653, clicks: 412, merchants: 1647, conversions: 81, gpvPositive: 79 },
   },
   {
     id: 'cpt',
@@ -47,8 +48,8 @@ const CAMPAIGNS: Campaign[] = [
     name: 'Costos por Transacción',
     url: '/admin/account/transaction-fees/ · evento PN_Trigger_CPT',
     color: '#953e91',
-    all: { views: 12181, uniqueViews: 11229, clicks: 1867, merchants: 11080, conversions: 578 },
-    last30: { views: 4813, uniqueViews: 4769, clicks: 755, merchants: 4715, conversions: 145 },
+    all: { views: 12181, uniqueViews: 11229, clicks: 1867, merchants: 11080, conversions: 423, gpvPositive: 413 },
+    last30: { views: 4813, uniqueViews: 4769, clicks: 755, merchants: 4715, conversions: 124, gpvPositive: 120 },
   },
 ];
 
@@ -65,9 +66,10 @@ const GENERAL_MERCHANTS_DEDUP: Record<Period, number> = {
   last30: 8833,
 };
 
-// Conversiones únicas reales (deduplicadas) entre las 3 campañas. Igual que con
-// merchants, NO es la suma de las 3 campañas: un merchant que convirtió habiendo visto
-// más de un trigger se cuenta una sola vez acá.
+// Conversiones únicas reales (deduplicadas, atribuidas last-touch a UNA sola campaña
+// cada una). A diferencia de una suma ingenua por campaña, cada merchant que convirtió
+// habiendo visto más de un trigger ya está asignado a una sola — por eso la suma de las
+// 3 campañas coincide exactamente con este total general.
 const GENERAL_CONVERSIONS_DEDUP: Record<Period, number> = {
   all: 1300,
   last30: 410,
@@ -91,10 +93,12 @@ export default function Page() {
     clicks: sum(period, 'clicks'),
     merchants: GENERAL_MERCHANTS_DEDUP[period],
     conversions: GENERAL_CONVERSIONS_DEDUP[period],
+    gpvPositive: sum(period, 'gpvPositive'),
   };
 
   const ctr = pct(totals.clicks, totals.uniqueViews);
   const cvr = pct(totals.conversions, totals.merchants);
+  const gpvShare = pct(totals.gpvPositive, totals.conversions);
 
   const periodLabel = period === 'all' ? 'All time (9 jun – 28 ago 2026)' : 'Últimos 30 días';
 
@@ -183,6 +187,11 @@ export default function Page() {
               <div className="sub">Conversiones / Merchants impactados</div>
             </div>
             <div className="kpi-card">
+              <div className="label">Conversiones con GPV &gt; 0 (30d)</div>
+              <div className="value accent">{gpvShare}</div>
+              <div className="sub">{fmt(totals.gpvPositive)} de {fmt(totals.conversions)} conversiones venden</div>
+            </div>
+            <div className="kpi-card">
               <div className="label">Comunicaciones activas</div>
               <div className="value">3</div>
               <div className="sub">MP · PP · CPT</div>
@@ -237,6 +246,12 @@ export default function Page() {
                     <span className="m-label">Conversiones</span>
                     <span className="m-value">{fmt(m.conversions)}</span>
                   </div>
+                  <div className="cc-metric-row">
+                    <span className="m-label">Con GPV &gt; 0 (30d)</span>
+                    <span className="m-value">
+                      {fmt(m.gpvPositive)} ({pct(m.gpvPositive, m.conversions)})
+                    </span>
+                  </div>
                   <div className="cc-metric-row highlight">
                     <span className="m-label">CVR</span>
                     <span className="m-value">{cCvr}</span>
@@ -255,27 +270,26 @@ export default function Page() {
             <div className="insight-item">
               <span className="bullet">1</span>
               <span className="txt">
-                <strong>MP lidera tanto en CTR (42,5%) como en CVR (8,4% all time)</strong>: al
-                interceptar al merchant justo cuando está a punto de activar Mercado Pago, genera
-                casi 2,5x más clicks proporcionales que CPT — y esa mayor intención también se
-                traduce en la conversión más alta de las 3 comms, aunque por un margen chico frente
-                a PP.
+                <strong>MP lidera tanto en CTR (42,5%) como en CVR (7,0% all time, atribución last-touch)</strong>:
+                al interceptar al merchant justo cuando está a punto de activar Mercado Pago,
+                genera casi 2,5x más clicks proporcionales que CPT — y esa mayor intención también
+                se traduce en la conversión más alta de las 3 comms.
               </span>
             </div>
             <div className="insight-item">
               <span className="bullet">2</span>
               <span className="txt">
-                <strong>PP queda muy cerca en conversión (CVR 8,0% all time)</strong>, pese a tener
-                el reach más chico (3.982 merchants). El argumento de transferencias automáticas vs.
+                <strong>PP queda segundo en conversión (CVR 6,2% all time)</strong>, pese a tener el
+                reach más chico (3.982 merchants). El argumento de transferencias automáticas vs.
                 verificación manual parece resolver una fricción real y concreta — MP y PP
-                convierten a tasas similares, ambas muy por encima de CPT.
+                convierten a tasas más parecidas entre sí que frente a CPT.
               </span>
             </div>
             <div className="insight-item">
               <span className="bullet">3</span>
               <span className="txt">
                 <strong>CPT tiene el mayor alcance (11.080 merchants impactados, ~46% del total)</strong>
-                {' '}pero la conversión más baja (5,2%). El merchant que revisa costos por transacción
+                {' '}pero la conversión más baja (3,8%). El merchant que revisa costos por transacción
                 está en modo comparativo, no necesariamente en modo de decisión inmediata — más
                 awareness, menos acción directa.
               </span>
@@ -308,6 +322,15 @@ export default function Page() {
                 este overlap.
               </span>
             </div>
+            <div className="insight-item">
+              <span className="bullet">7</span>
+              <span className="txt">
+                <strong>El 97,5% de las conversiones tienen GPV mayor a $0 en los últimos 30 días</strong>.
+                Esto es una señal fuerte de calidad: la gran mayoría de las activaciones no son solo
+                un cambio de estado en el sistema — el merchant efectivamente está cobrando con
+                Pago Nube.
+              </span>
+            </div>
           </div>
         </section>
       </main>
@@ -333,18 +356,25 @@ export default function Page() {
               los 3 campañas (24.048).
             </li>
             <li>
-              <strong>Conversiones:</strong> merchant impactado por el trigger cuyo estado de
-              Pago Nube en HubSpot (Nuvem Pago Monthly Status) es <code>first_activation</code>,
-              <code>comeback</code> o <code>phoenix</code> (fintech, sincronizado desde HubSpot), Y
-              cuya fecha de última actualización de ese estado es posterior a la fecha en que vio
-              el trigger. A diferencia de la versión anterior (snapshot del estado actual sin
-              fecha), este criterio descarta activaciones que ya habían ocurrido antes de la
-              exposición.
+              <strong>Conversiones (por campaña):</strong> a cada merchant convertido se le asigna
+              <strong> una sola campaña por atribución last-touch</strong> — la comm que vio más
+              recientemente, entre las que vio antes de que cambiara su estado de Pago Nube. Por
+              eso la suma de conversiones de MP + PP + CPT coincide exactamente con el total
+              general (1.300 all time): ya no hay doble conteo de merchants que vieron más de un
+              trigger.
             </li>
             <li>
-              <strong>Conversiones (general):</strong> igual que merchants impactados, NO es la
-              suma de las 3 campañas — es el total único deduplicado (un merchant que convirtió
-              habiendo visto más de un trigger se cuenta una sola vez).
+              <strong>Conversiones (general):</strong> merchant impactado por al menos un trigger
+              cuyo estado de Pago Nube en HubSpot (Nuvem Pago Monthly Status) es{' '}
+              <code>first_activation</code>, <code>comeback</code> o <code>phoenix</code>{' '}
+              (fintech, sincronizado desde HubSpot), Y cuya fecha de última actualización de ese
+              estado es posterior a la primera vez que vio cualquiera de los triggers.
+            </li>
+            <li>
+              <strong>Conversiones con GPV &gt; 0:</strong> de las conversiones, cuántas tienen GPV
+              (Gross Payment Volume) mayor a $0 en los últimos 30 días (<code>gpv_30d_fintech</code>,
+              HubSpot). Sirve como chequeo de calidad — confirma que la activación se tradujo en uso
+              real, no solo en un cambio de estado.
             </li>
             <li>
               Limitación conocida: la fecha de "última actualización de estado" no siempre refleja
