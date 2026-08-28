@@ -86,18 +86,17 @@ export default function Page() {
       <header className="hero">
         <div className="container">
           <span className="eyebrow">Pago Nube · Lifecycle AR</span>
-          <h1>Resultados: Comms x Triggers por comportamiento</h1>
+          <h1>Resultados: Comms por Triggers de comportamiento</h1>
           <p className="subtitle">
             Triggers in-app que interceptan al merchant en el momento exacto en que evalúa medios
             de pago — Mercado Pago, Pagos Personalizados y Costos por Transacción — para presentar
-            a Pago Nube como alternativa. Audiencia: merchants AR con Pago Nube inactivo o en churn.
+            a Pago Nube como alternativa.
+            <br />
+            Audiencia: merchants con Pago Nube inactivo o que nunca activaron.
           </p>
           <div className="meta-row">
             <span>
               Responsable: <strong>Alan Lelli</strong>
-            </span>
-            <span>
-              Kick off: <strong>20 may 2026</strong>
             </span>
             <span>
               Activación: <strong>9 jun 2026</strong>
