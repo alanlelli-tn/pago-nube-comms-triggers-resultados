@@ -29,8 +29,8 @@ const CAMPAIGNS: Campaign[] = [
     name: 'Configuración Mercado Pago',
     url: '/admin/settings/payments · evento PN_Trigger_MP',
     color: '#0050c3',
-    all: { views: 9114, uniqueViews: 9017, clicks: 3832, merchants: 8966, conversions: 1552 },
-    last30: { views: 3717, uniqueViews: 3710, clicks: 1553, merchants: 3699, conversions: 443 },
+    all: { views: 9114, uniqueViews: 9017, clicks: 3832, merchants: 8986, conversions: 758 },
+    last30: { views: 3717, uniqueViews: 3710, clicks: 1553, merchants: 3707, conversions: 229 },
   },
   {
     id: 'pp',
@@ -38,8 +38,8 @@ const CAMPAIGNS: Campaign[] = [
     name: 'Configuración Pagos Personalizados',
     url: '/admin/settings/payments · evento PN_Trigger_PP',
     color: '#00b4e6',
-    all: { views: 4069, uniqueViews: 3988, clicks: 1019, merchants: 3972, conversions: 967 },
-    last30: { views: 1656, uniqueViews: 1653, clicks: 412, merchants: 1649, conversions: 348 },
+    all: { views: 4069, uniqueViews: 3988, clicks: 1019, merchants: 3982, conversions: 319 },
+    last30: { views: 1656, uniqueViews: 1653, clicks: 412, merchants: 1647, conversions: 100 },
   },
   {
     id: 'cpt',
@@ -47,14 +47,31 @@ const CAMPAIGNS: Campaign[] = [
     name: 'Costos por Transacción',
     url: '/admin/account/transaction-fees/ · evento PN_Trigger_CPT',
     color: '#953e91',
-    all: { views: 12181, uniqueViews: 11229, clicks: 1867, merchants: 11057, conversions: 1179 },
-    last30: { views: 4813, uniqueViews: 4769, clicks: 755, merchants: 4722, conversions: 327 },
+    all: { views: 12181, uniqueViews: 11229, clicks: 1867, merchants: 11080, conversions: 578 },
+    last30: { views: 4813, uniqueViews: 4769, clicks: 755, merchants: 4715, conversions: 145 },
   },
 ];
 
 function sum(period: Period, key: keyof CampaignMetrics) {
   return CAMPAIGNS.reduce((acc, c) => acc + c[period][key], 0);
 }
+
+// Merchants únicos reales (deduplicados) entre las 3 campañas, calculado por fuera de
+// Userflow cruzando los exports crudos de sesiones (Company: ID) de cada trigger.
+// A diferencia del resto de las métricas generales, este valor NO es una suma de las
+// 3 campañas — ya contempla el overlap de merchants que vieron más de un trigger.
+const GENERAL_MERCHANTS_DEDUP: Record<Period, number> = {
+  all: 20489,
+  last30: 8833,
+};
+
+// Conversiones únicas reales (deduplicadas) entre las 3 campañas. Igual que con
+// merchants, NO es la suma de las 3 campañas: un merchant que convirtió habiendo visto
+// más de un trigger se cuenta una sola vez acá.
+const GENERAL_CONVERSIONS_DEDUP: Record<Period, number> = {
+  all: 1300,
+  last30: 410,
+};
 
 function pct(numerator: number, denominator: number) {
   if (!denominator) return '0%';
@@ -64,14 +81,6 @@ function pct(numerator: number, denominator: number) {
 function fmt(n: number) {
   return n.toLocaleString('es-AR');
 }
-// Merchants únicos reales (deduplicados) entre las 3 campañas, calculado por fuera de
-// Userflow cruzando los exports crudos de sesiones (Company: ID) de cada trigger.
-// A diferencia del resto de las métricas generales, este valor NO es una suma de las
-// 3 campañas — ya contempla el overlap de merchants que vieron más de un trigger.
-const GENERAL_MERCHANTS_DEDUP: Record<Period, number> = {
-  all: 20489,
-  last30: 8835,
-};
 
 export default function Page() {
   const [period, setPeriod] = useState<Period>('all');
@@ -81,7 +90,7 @@ export default function Page() {
     uniqueViews: sum(period, 'uniqueViews'),
     clicks: sum(period, 'clicks'),
     merchants: GENERAL_MERCHANTS_DEDUP[period],
-    conversions: sum(period, 'conversions'),
+    conversions: GENERAL_CONVERSIONS_DEDUP[period],
   };
 
   const ctr = pct(totals.clicks, totals.uniqueViews);
@@ -246,26 +255,27 @@ export default function Page() {
             <div className="insight-item">
               <span className="bullet">1</span>
               <span className="txt">
-                <strong>MP es el trigger con mayor engagement (CTR 42,5% all time)</strong>: al
+                <strong>MP lidera tanto en CTR (42,5%) como en CVR (8,4% all time)</strong>: al
                 interceptar al merchant justo cuando está a punto de activar Mercado Pago, genera
-                casi 2,5x más clicks proporcionales que CPT. Es el momento de mayor tensión
-                competitiva del funnel.
+                casi 2,5x más clicks proporcionales que CPT — y esa mayor intención también se
+                traduce en la conversión más alta de las 3 comms, aunque por un margen chico frente
+                a PP.
               </span>
             </div>
             <div className="insight-item">
               <span className="bullet">2</span>
               <span className="txt">
-                <strong>PP convierte mejor que los otros dos triggers (CVR 24,3% all time)</strong>,
-                pese a tener el reach más chico (3.972 merchants). El argumento de transferencias
-                automáticas vs. verificación manual parece resolver una fricción real y concreta,
-                lo que se traduce en mayor conversión efectiva.
+                <strong>PP queda muy cerca en conversión (CVR 8,0% all time)</strong>, pese a tener
+                el reach más chico (3.982 merchants). El argumento de transferencias automáticas vs.
+                verificación manual parece resolver una fricción real y concreta — MP y PP
+                convierten a tasas similares, ambas muy por encima de CPT.
               </span>
             </div>
             <div className="insight-item">
               <span className="bullet">3</span>
               <span className="txt">
-                <strong>CPT tiene el mayor alcance (11.057 merchants impactados, ~46% del total)</strong>
-                {' '}pero la conversión más baja (10,7%). El merchant que revisa costos por transacción
+                <strong>CPT tiene el mayor alcance (11.080 merchants impactados, ~46% del total)</strong>
+                {' '}pero la conversión más baja (5,2%). El merchant que revisa costos por transacción
                 está en modo comparativo, no necesariamente en modo de decisión inmediata — más
                 awareness, menos acción directa.
               </span>
@@ -273,10 +283,11 @@ export default function Page() {
             <div className="insight-item">
               <span className="bullet">4</span>
               <span className="txt">
-               <strong>El CVR de últimos 30 días es más bajo que el CVR all time en las 3 comms</strong>
-                {' '}(general: 12,7% vs 18,0%). Esto es esperable dado que la conversión se mide sobre el
-                estado actual de activación: los merchants expuestos hace más tiempo tuvieron más
-                días para convertir. No es una caída de performance de la comunicación.
+                <strong>El CVR de últimos 30 días es más bajo que el CVR all time en las 3 comms</strong>
+                {' '}(general: 4,6% vs 6,3%). Esperable: la conversión ahora exige que el cambio de
+                estado de Pago Nube sea posterior a la exposición, así que los merchants expuestos
+                hace más tiempo tuvieron más días para convertir dentro de esa ventana. No es una
+                caída de performance de la comunicación.
               </span>
             </div>
             <div className="insight-item">
@@ -322,14 +333,25 @@ export default function Page() {
               los 3 campañas (24.048).
             </li>
             <li>
-              Conversiones: cruce de merchants impactados por cada trigger contra el estado actual
-              de activación de Pago Nube (NuvemLens / atributo sincronizado de Fintech). Es un
-              snapshot del estado vigente, no una fecha exacta de activación post-exposición.
-              El total general de conversiones sí es una <strong>suma simple</strong> de las 3
-              campañas (no deduplicada como los merchants impactados): no existe hoy una tabla de
-              activación de Pago Nube AR en el warehouse que permita cruzar la lista completa de
-              merchants únicos contra su estado de activación, así que puede sobreestimar
-              levemente la conversión real si un mismo merchant convertido vio más de un trigger.
+              <strong>Conversiones:</strong> merchant impactado por el trigger cuyo estado de
+              Pago Nube en HubSpot (Nuvem Pago Monthly Status) es <code>first_activation</code>,
+              <code>comeback</code> o <code>phoenix</code> (fintech, sincronizado desde HubSpot), Y
+              cuya fecha de última actualización de ese estado es posterior a la fecha en que vio
+              el trigger. A diferencia de la versión anterior (snapshot del estado actual sin
+              fecha), este criterio descarta activaciones que ya habían ocurrido antes de la
+              exposición.
+            </li>
+            <li>
+              <strong>Conversiones (general):</strong> igual que merchants impactados, NO es la
+              suma de las 3 campañas — es el total único deduplicado (un merchant que convirtió
+              habiendo visto más de un trigger se cuenta una sola vez).
+            </li>
+            <li>
+              Limitación conocida: la fecha de "última actualización de estado" no siempre refleja
+              el momento exacto del evento de activación (puede quedar congelada si el pipeline
+              mensual no vuelve a escribir el registro), por lo que este número es una aproximación
+              conservadora — probablemente subestima la conversión real atribuible al trigger antes
+              que sobreestimarla.
             </li>
             <li>
               Views y views únicos generales sí son la suma directa de las 3 comms.
