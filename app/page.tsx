@@ -72,7 +72,7 @@ export default function Page() {
     views: sum(period, 'views'),
     uniqueViews: sum(period, 'uniqueViews'),
     clicks: sum(period, 'clicks'),
-    merchants: sum(period, 'merchants'),
+    merchants: GENERAL_MERCHANTS_DEDUP[period],
     conversions: sum(period, 'conversions'),
   };
 
@@ -292,18 +292,29 @@ export default function Page() {
               sesión de flow; clicks únicos por evento de botón "Activar Pago Nube".
             </li>
             <li>
-              Merchants únicos impactados: store IDs (companies) únicos entre quienes vieron cada
-              trigger.
+              Merchants únicos impactados (por campaña): store IDs (companies) únicos entre
+              quienes vieron cada trigger.
+            </li>
+            <li>
+              <strong>Merchants únicos impactados (general):</strong> a diferencia del resto de
+              las métricas generales, este número NO es una suma de las 3 campañas — es el total
+              real deduplicado, calculado cruzando los exports crudos de sesiones de las 3 comms
+              (Company: ID). Hay overlap real entre campañas: 3.559 merchants vieron más de un
+              trigger, por lo que el total único (20.489 all time) es menor que la suma simple de
+              los 3 campañas (24.048).
             </li>
             <li>
               Conversiones: cruce de merchants impactados por cada trigger contra el estado actual
               de activación de Pago Nube (NuvemLens / atributo sincronizado de Fintech). Es un
-              snapshot del estado vigente, no una fecha exacta de activación post-exposición — los
-              números pueden incluir activaciones no estrictamente atribuibles al trigger.
+              snapshot del estado vigente, no una fecha exacta de activación post-exposición.
+              El total general de conversiones sí es una <strong>suma simple</strong> de las 3
+              campañas (no deduplicada como los merchants impactados): no existe hoy una tabla de
+              activación de Pago Nube AR en el warehouse que permita cruzar la lista completa de
+              merchants únicos contra su estado de activación, así que puede sobreestimar
+              levemente la conversión real si un mismo merchant convertido vio más de un trigger.
             </li>
             <li>
-              Los totales "generales" son la suma de las 3 comms; un merchant que vio más de un
-              trigger puede estar contado más de una vez a nivel general.
+              Views y views únicos generales sí son la suma directa de las 3 comms.
             </li>
             <li>Ventana "All time": 9 jun 2026 (activación) – 28 ago 2026.</li>
           </ul>
