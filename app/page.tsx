@@ -64,6 +64,14 @@ function pct(numerator: number, denominator: number) {
 function fmt(n: number) {
   return n.toLocaleString('es-AR');
 }
+// Merchants únicos reales (deduplicados) entre las 3 campañas, calculado por fuera de
+// Userflow cruzando los exports crudos de sesiones (Company: ID) de cada trigger.
+// A diferencia del resto de las métricas generales, este valor NO es una suma de las
+// 3 campañas — ya contempla el overlap de merchants que vieron más de un trigger.
+const GENERAL_MERCHANTS_DEDUP: Record<Period, number> = {
+  all: 20489,
+  last30: 8835,
+};
 
 export default function Page() {
   const [period, setPeriod] = useState<Period>('all');
