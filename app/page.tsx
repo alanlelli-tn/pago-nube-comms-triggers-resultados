@@ -273,8 +273,8 @@ export default function Page() {
             <div className="insight-item">
               <span className="bullet">4</span>
               <span className="txt">
-                <strong>El CVR de últimos 30 días es más bajo que el CVR all time en las 3 comms</strong>
-                {' '}(general: 11,1% vs 15,4%). Esto es esperable dado que la conversión se mide sobre el
+               <strong>El CVR de últimos 30 días es más bajo que el CVR all time en las 3 comms</strong>
+                {' '}(general: 12,7% vs 18,0%). Esto es esperable dado que la conversión se mide sobre el
                 estado actual de activación: los merchants expuestos hace más tiempo tuvieron más
                 días para convertir. No es una caída de performance de la comunicación.
               </span>
@@ -285,6 +285,16 @@ export default function Page() {
                 <strong>El CTR general se mantiene estable entre ventanas (27,7% all time vs 26,9% últimos 30 días)</strong>,
                 lo que indica que el copy y el timing de los triggers siguen siendo relevantes para
                 la audiencia sin señales de fatiga.
+              </span>
+            </div>
+            <div className="insight-item">
+              <span className="bullet">6</span>
+              <span className="txt">
+                <strong>1 de cada 6 merchants impactados vio más de un trigger</strong> (3.559 de
+                24.048, ~15%). El cruce más frecuente es MP-CPT (1.883 merchants), seguido de
+                MP-PP (1.185) — coherente con que ambos comparten el flujo de configuración de
+                medios de pago. El número de "merchants únicos impactados" ya está corregido por
+                este overlap.
               </span>
             </div>
           </div>
