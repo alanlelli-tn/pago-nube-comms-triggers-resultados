@@ -91,6 +91,7 @@ function fmt(n: number) {
 
 export default function Page() {
   const [period, setPeriod] = useState<Period>('all');
+  const [openPreview, setOpenPreview] = useState<Campaign['id'] | null>(null);
 
   const totals = {
     views: sum(period, 'views'),
@@ -227,15 +228,13 @@ export default function Page() {
                   <h3>{c.name}</h3>
                   <div className="cc-url">{c.url}</div>
 
-                  <div className="cc-preview">
-                    <Image
-                      src={c.previewSrc}
-                      alt={`Vista previa del trigger in-app: ${c.name}`}
-                      width={560}
-                      height={620}
-                      className="cc-preview-img"
-                    />
-                  </div>
+                  <button
+                    type="button"
+                    className="cc-preview-cta"
+                    onClick={() => setOpenPreview(c.id)}
+                  >
+                    👁 Ver comunicación
+                  </button>
 
                   <div className="cc-metric-row">
                     <span className="m-label">Views totales</span>
@@ -276,6 +275,33 @@ export default function Page() {
             })}
           </div>
         </section>
+
+        {openPreview && (
+          <div className="preview-modal-backdrop" onClick={() => setOpenPreview(null)}>
+            <div className="preview-modal" onClick={(e) => e.stopPropagation()}>
+              <button
+                type="button"
+                className="preview-modal-close"
+                onClick={() => setOpenPreview(null)}
+                aria-label="Cerrar"
+              >
+                ✕
+              </button>
+              <Image
+                src={CAMPAIGNS.find((c) => c.id === openPreview)!.previewSrc}
+                alt={`Vista previa del trigger in-app: ${
+                  CAMPAIGNS.find((c) => c.id === openPreview)!.name
+                }`}
+                width={560}
+                height={620}
+                className="preview-modal-img"
+              />
+              <p className="preview-modal-caption">
+                {CAMPAIGNS.find((c) => c.id === openPreview)!.name}
+              </p>
+            </div>
+          </div>
+        )}
 
         <section className="block container">
           <div className="section-title">
