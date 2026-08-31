@@ -289,6 +289,20 @@ section.block {
   word-break: break-all;
 }
 
+.campaign-card .cc-preview {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  margin-bottom: 18px;
+  background: var(--grey-bg);
+}
+
+.campaign-card .cc-preview-img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .campaign-card .cc-metric-row {
   display: flex;
   align-items: baseline;
