@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 
 type Period = 'all' | 'last30';
 
@@ -19,6 +20,7 @@ type Campaign = {
   name: string;
   url: string;
   color: string;
+  previewSrc: string;
   all: CampaignMetrics;
   last30: CampaignMetrics;
 };
@@ -30,6 +32,7 @@ const CAMPAIGNS: Campaign[] = [
     name: 'Configuración Mercado Pago',
     url: '/admin/settings/payments · evento PN_Trigger_MP',
     color: '#0050c3',
+    previewSrc: '/screenshots/mp.png',
     all: { views: 9114, uniqueViews: 9017, clicks: 3832, merchants: 8986, conversions: 631, gpvPositive: 613 },
     last30: { views: 3717, uniqueViews: 3710, clicks: 1553, merchants: 3707, conversions: 205, gpvPositive: 198 },
   },
@@ -39,6 +42,7 @@ const CAMPAIGNS: Campaign[] = [
     name: 'Configuración Pagos Personalizados',
     url: '/admin/settings/payments · evento PN_Trigger_PP',
     color: '#00b4e6',
+    previewSrc: '/screenshots/pp.png',
     all: { views: 4069, uniqueViews: 3988, clicks: 1019, merchants: 3982, conversions: 246, gpvPositive: 242 },
     last30: { views: 1656, uniqueViews: 1653, clicks: 412, merchants: 1647, conversions: 81, gpvPositive: 79 },
   },
@@ -48,6 +52,7 @@ const CAMPAIGNS: Campaign[] = [
     name: 'Costos por Transacción',
     url: '/admin/account/transaction-fees/ · evento PN_Trigger_CPT',
     color: '#953e91',
+    previewSrc: '/screenshots/cpt.png',
     all: { views: 12181, uniqueViews: 11229, clicks: 1867, merchants: 11080, conversions: 423, gpvPositive: 413 },
     last30: { views: 4813, uniqueViews: 4769, clicks: 755, merchants: 4715, conversions: 124, gpvPositive: 120 },
   },
@@ -222,6 +227,16 @@ export default function Page() {
                   <h3>{c.name}</h3>
                   <div className="cc-url">{c.url}</div>
 
+                  <div className="cc-preview">
+                    <Image
+                      src={c.previewSrc}
+                      alt={`Vista previa del trigger in-app: ${c.name}`}
+                      width={560}
+                      height={620}
+                      className="cc-preview-img"
+                    />
+                  </div>
+
                   <div className="cc-metric-row">
                     <span className="m-label">Views totales</span>
                     <span className="m-value">{fmt(m.views)}</span>
@@ -392,4 +407,5 @@ export default function Page() {
       </footer>
     </>
   );
+}
 }
