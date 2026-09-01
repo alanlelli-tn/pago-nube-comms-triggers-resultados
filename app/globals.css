@@ -458,3 +458,87 @@ footer.methodology ul {
   margin: 0;
   padding-left: 18px;
 }
+
+/* ---------- Monthly comparison table ---------- */
+.month-compare-table {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.mct-row {
+  display: grid;
+  grid-template-columns: 1.6fr 0.8fr 0.8fr 1fr;
+  align-items: center;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13.5px;
+}
+
+.mct-row:last-child {
+  border-bottom: none;
+}
+
+.mct-row.mct-header {
+  background: var(--grey-bg);
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--grey-mid);
+}
+
+.mct-label {
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.mct-delta {
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.mct-up {
+  color: var(--success);
+}
+
+.mct-down {
+  color: #d33b3b;
+}
+
+.mct-flat {
+  color: var(--grey-mid);
+}
+
+.mct-note {
+  margin-top: 16px;
+  font-size: 12.5px;
+  color: var(--grey-mid);
+  line-height: 1.6;
+  background: var(--clear-blue-bg);
+  border: 1px solid var(--light-blue);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.mct-note strong {
+  color: var(--navy);
+}
+
+.mct-by-campaign {
+  margin-top: 20px;
+}
+
+.mct-mini-card {
+  padding: 18px 20px;
+}
+
+@media (max-width: 640px) {
+  .mct-row {
+    grid-template-columns: 1.4fr 0.8fr 0.8fr 1fr;
+    font-size: 12px;
+    padding: 10px 12px;
+  }
+}
