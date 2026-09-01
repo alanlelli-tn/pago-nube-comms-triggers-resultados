@@ -33,8 +33,8 @@ const CAMPAIGNS: Campaign[] = [
     url: '/admin/settings/payments · evento PN_Trigger_MP',
     color: '#0050c3',
     previewSrc: '/screenshots/mp.png',
-    all: { views: 9114, uniqueViews: 9017, clicks: 3832, merchants: 8986, conversions: 631, gpvPositive: 613 },
-    last30: { views: 3717, uniqueViews: 3710, clicks: 1553, merchants: 3707, conversions: 205, gpvPositive: 198 },
+    all: { views: 9480, uniqueViews: 9310, clicks: 3986, merchants: 9310, conversions: 660, gpvPositive: 643 },
+    last30: { views: 3626, uniqueViews: 3605, clicks: 1537, merchants: 3605, conversions: 209, gpvPositive: 201 },
   },
   {
     id: 'pp',
@@ -43,8 +43,8 @@ const CAMPAIGNS: Campaign[] = [
     url: '/admin/settings/payments · evento PN_Trigger_PP',
     color: '#00b4e6',
     previewSrc: '/screenshots/pp.png',
-    all: { views: 4069, uniqueViews: 3988, clicks: 1019, merchants: 3982, conversions: 246, gpvPositive: 242 },
-    last30: { views: 1656, uniqueViews: 1653, clicks: 412, merchants: 1647, conversions: 81, gpvPositive: 79 },
+    all: { views: 4249, uniqueViews: 4145, clicks: 1061, merchants: 4145, conversions: 255, gpvPositive: 250 },
+    last30: { views: 1613, uniqueViews: 1607, clicks: 401, merchants: 1607, conversions: 79, gpvPositive: 76 },
   },
   {
     id: 'cpt',
@@ -53,8 +53,8 @@ const CAMPAIGNS: Campaign[] = [
     url: '/admin/account/transaction-fees/ · evento PN_Trigger_CPT',
     color: '#953e91',
     previewSrc: '/screenshots/cpt.png',
-    all: { views: 12181, uniqueViews: 11229, clicks: 1867, merchants: 11080, conversions: 423, gpvPositive: 413 },
-    last30: { views: 4813, uniqueViews: 4769, clicks: 755, merchants: 4715, conversions: 124, gpvPositive: 120 },
+    all: { views: 12627, uniqueViews: 11426, clicks: 1945, merchants: 11426, conversions: 455, gpvPositive: 446 },
+    last30: { views: 4715, uniqueViews: 4631, clicks: 745, merchants: 4631, conversions: 130, gpvPositive: 126 },
   },
 ];
 
@@ -67,8 +67,8 @@ function sum(period: Period, key: keyof CampaignMetrics) {
 // A diferencia del resto de las métricas generales, este valor NO es una suma de las
 // 3 campañas — ya contempla el overlap de merchants que vieron más de un trigger.
 const GENERAL_MERCHANTS_DEDUP: Record<Period, number> = {
-  all: 20489,
-  last30: 8833,
+  all: 21172,
+  last30: 8650,
 };
 
 // Conversiones únicas reales (deduplicadas, atribuidas last-touch a UNA sola campaña
@@ -76,8 +76,8 @@ const GENERAL_MERCHANTS_DEDUP: Record<Period, number> = {
 // habiendo visto más de un trigger ya está asignado a una sola — por eso la suma de las
 // 3 campañas coincide exactamente con este total general.
 const GENERAL_CONVERSIONS_DEDUP: Record<Period, number> = {
-  all: 1300,
-  last30: 410,
+  all: 1370,
+  last30: 418,
 };
 
 function pct(numerator: number, denominator: number) {
@@ -106,7 +106,7 @@ export default function Page() {
   const cvr = pct(totals.conversions, totals.merchants);
   const gpvShare = pct(totals.gpvPositive, totals.conversions);
 
-  const periodLabel = period === 'all' ? 'All time (9 jun – 28 ago 2026)' : 'Últimos 30 días';
+  const periodLabel = period === 'all' ? 'All time (9 jun – 31 ago 2026)' : 'Últimos 30 días';
 
   return (
     <>
@@ -311,7 +311,7 @@ export default function Page() {
             <div className="insight-item">
               <span className="bullet">1</span>
               <span className="txt">
-                <strong>MP lidera tanto en CTR (42,5%) como en CVR (7,0% all time, atribución last-touch)</strong>:
+                <strong>MP lidera tanto en CTR (42,8%) como en CVR (7,1% all time, atribución last-touch)</strong>:
                 al interceptar al merchant justo cuando está a punto de activar Mercado Pago,
                 genera casi 2,5x más clicks proporcionales que CPT — y esa mayor intención también
                 se traduce en la conversión más alta de las 3 comms.
@@ -321,7 +321,7 @@ export default function Page() {
               <span className="bullet">2</span>
               <span className="txt">
                 <strong>PP queda segundo en conversión (CVR 6,2% all time)</strong>, pese a tener el
-                reach más chico (3.982 merchants). El argumento de transferencias automáticas vs.
+                reach más chico (4.145 merchants). El argumento de transferencias automáticas vs.
                 verificación manual parece resolver una fricción real y concreta — MP y PP
                 convierten a tasas más parecidas entre sí que frente a CPT.
               </span>
@@ -329,8 +329,8 @@ export default function Page() {
             <div className="insight-item">
               <span className="bullet">3</span>
               <span className="txt">
-                <strong>CPT tiene el mayor alcance (11.080 merchants impactados, ~46% del total)</strong>
-                {' '}pero la conversión más baja (3,8%). El merchant que revisa costos por transacción
+                <strong>CPT tiene el mayor alcance (11.426 merchants impactados, ~46% del total)</strong>
+                {' '}pero la conversión más baja (4,0%). El merchant que revisa costos por transacción
                 está en modo comparativo, no necesariamente en modo de decisión inmediata — más
                 awareness, menos acción directa.
               </span>
@@ -339,7 +339,7 @@ export default function Page() {
               <span className="bullet">4</span>
               <span className="txt">
                 <strong>El CVR de últimos 30 días es más bajo que el CVR all time en las 3 comms</strong>
-                {' '}(general: 4,6% vs 6,3%). Esperable: la conversión ahora exige que el cambio de
+                {' '}(general: 4,8% vs 6,5%). Esperable: la conversión ahora exige que el cambio de
                 estado de Pago Nube sea posterior a la exposición, así que los merchants expuestos
                 hace más tiempo tuvieron más días para convertir dentro de esa ventana. No es una
                 caída de performance de la comunicación.
@@ -348,7 +348,7 @@ export default function Page() {
             <div className="insight-item">
               <span className="bullet">5</span>
               <span className="txt">
-                <strong>El CTR general se mantiene estable entre ventanas (27,7% all time vs 26,9% últimos 30 días)</strong>,
+                <strong>El CTR general se mantiene estable entre ventanas (28,1% all time vs 27,3% últimos 30 días)</strong>,
                 lo que indica que el copy y el timing de los triggers siguen siendo relevantes para
                 la audiencia sin señales de fatiga.
               </span>
@@ -356,9 +356,9 @@ export default function Page() {
             <div className="insight-item">
               <span className="bullet">6</span>
               <span className="txt">
-                <strong>1 de cada 6 merchants impactados vio más de un trigger</strong> (3.559 de
-                24.048, ~15%). El cruce más frecuente es MP-CPT (1.883 merchants), seguido de
-                MP-PP (1.185) — coherente con que ambos comparten el flujo de configuración de
+                <strong>1 de cada 6,7 merchants impactados vio más de un trigger</strong> (3.709 de
+                24.881, ~15%). El cruce más frecuente es MP-CPT (1.951 merchants), seguido de
+                MP-PP (1.241) — coherente con que ambos comparten el flujo de configuración de
                 medios de pago. El número de "merchants únicos impactados" ya está corregido por
                 este overlap.
               </span>
@@ -366,10 +366,10 @@ export default function Page() {
             <div className="insight-item">
               <span className="bullet">7</span>
               <span className="txt">
-                <strong>El 97,5% de las conversiones tienen GPV mayor a $0 en los últimos 30 días</strong>.
-                Esto es una señal fuerte de calidad: la gran mayoría de las activaciones no son solo
-                un cambio de estado en el sistema — el merchant efectivamente está cobrando con
-                Pago Nube.
+                <strong>97,7% de las conversiones tienen GPV mayor a $0 en los últimos 30 días</strong>.
+                Es una señal fuerte de calidad: la gran mayoría de las activaciones no son solo un
+                cambio de estado en el sistema — el merchant efectivamente está cobrando con Pago
+                Nube.
               </span>
             </div>
           </div>
@@ -392,16 +392,16 @@ export default function Page() {
               <strong>Merchants únicos impactados (general):</strong> a diferencia del resto de
               las métricas generales, este número NO es una suma de las 3 campañas — es el total
               real deduplicado, calculado cruzando los exports crudos de sesiones de las 3 comms
-              (Company: ID). Hay overlap real entre campañas: 3.559 merchants vieron más de un
-              trigger, por lo que el total único (20.489 all time) es menor que la suma simple de
-              los 3 campañas (24.048).
+              (Company: ID). Hay overlap real entre campañas: 3.709 merchants vieron más de un
+              trigger, por lo que el total único (21.172 all time) es menor que la suma simple de
+              los 3 campañas (24.881).
             </li>
             <li>
               <strong>Conversiones (por campaña):</strong> a cada merchant convertido se le asigna
               <strong> una sola campaña por atribución last-touch</strong> — la comm que vio más
               recientemente, entre las que vio antes de que cambiara su estado de Pago Nube. Por
               eso la suma de conversiones de MP + PP + CPT coincide exactamente con el total
-              general (1.300 all time): ya no hay doble conteo de merchants que vieron más de un
+              general (1.370 all time): ya no hay doble conteo de merchants que vieron más de un
               trigger.
             </li>
             <li>
@@ -427,7 +427,7 @@ export default function Page() {
             <li>
               Views y views únicos generales sí son la suma directa de las 3 comms.
             </li>
-            <li>Ventana "All time": 9 jun 2026 (activación) – 28 ago 2026.</li>
+            <li>Ventana "All time": 9 jun 2026 (activación) – 31 ago 2026.</li>
           </ul>
         </div>
       </footer>
