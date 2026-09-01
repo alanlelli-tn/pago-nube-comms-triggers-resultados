@@ -62,6 +62,54 @@ function sum(period: Period, key: keyof CampaignMetrics) {
   return CAMPAIGNS.reduce((acc, c) => acc + c[period][key], 0);
 }
 
+// Comparativo mensual (cohortes por mes de primera exposición). Cada mes usa la misma
+// metodología que el resto del tablero: merchants dedup real, conversiones con
+// atribución last-touch, y CVR = conversiones / merchants dedup de ese mes.
+type MonthMetrics = {
+  views: number;
+  uniqueViews: number;
+  clicks: number;
+  merchants: number;
+  conversions: number;
+  gpvPositive: number;
+  byCampaign: Record<'MP' | 'PP' | 'CPT', { views: number; uniqueViews: number; clicks: number; conversions: number }>;
+};
+
+const MONTHLY_COMPARISON: { label: string; data: MonthMetrics }[] = [
+  {
+    label: 'Julio 2026',
+    data: {
+      views: 9239,
+      uniqueViews: 9120,
+      clicks: 2438,
+      merchants: 8034,
+      conversions: 632,
+      gpvPositive: 620,
+      byCampaign: {
+        MP: { views: 3287, uniqueViews: 3266, clicks: 1378, conversions: 295 },
+        PP: { views: 1560, uniqueViews: 1552, clicks: 384, conversions: 110 },
+        CPT: { views: 4392, uniqueViews: 4302, clicks: 676, conversions: 227 },
+      },
+    },
+  },
+  {
+    label: 'Agosto 2026',
+    data: {
+      views: 10239,
+      uniqueViews: 10120,
+      clicks: 2767,
+      merchants: 8884,
+      conversions: 431,
+      gpvPositive: 416,
+      byCampaign: {
+        MP: { views: 3738, uniqueViews: 3716, clicks: 1584, conversions: 218 },
+        PP: { views: 1666, uniqueViews: 1659, clicks: 416, conversions: 81 },
+        CPT: { views: 4835, uniqueViews: 4745, clicks: 767, conversions: 132 },
+      },
+    },
+  },
+];
+
 // Merchants únicos reales (deduplicados) entre las 3 campañas, calculado por fuera de
 // Userflow cruzando los exports crudos de sesiones (Company: ID) de cada trigger.
 // A diferencia del resto de las métricas generales, este valor NO es una suma de las
@@ -87,6 +135,21 @@ function pct(numerator: number, denominator: number) {
 
 function fmt(n: number) {
   return n.toLocaleString('es-AR');
+}
+
+function delta(current: number, previous: number) {
+  if (!previous) return { text: '—', dir: 'flat' as const };
+  const diff = ((current - previous) / previous) * 100;
+  const dir = diff > 0.5 ? 'up' : diff < -0.5 ? 'down' : 'flat';
+  const sign = diff > 0 ? '+' : '';
+  return { text: `${sign}${diff.toFixed(1)}%`, dir };
+}
+
+function deltaPp(current: number, previous: number) {
+  const diff = current - previous;
+  const dir = diff > 0.05 ? 'up' : diff < -0.05 ? 'down' : 'flat';
+  const sign = diff > 0 ? '+' : '';
+  return { text: `${sign}${diff.toFixed(1)} pp`, dir };
 }
 
 export default function Page() {
@@ -302,6 +365,98 @@ export default function Page() {
             </div>
           </div>
         )}
+
+        <section className="block container">
+          <div className="section-title">
+            <h2>Comparativo mensual: Agosto vs. Julio</h2>
+          </div>
+
+          <div className="month-compare-table">
+            <div className="mct-row mct-header">
+              <span>Métrica</span>
+              <span>Julio</span>
+              <span>Agosto</span>
+              <span>Variación</span>
+            </div>
+
+            {(() => {
+              const jul = MONTHLY_COMPARISON[0].data;
+              const ago = MONTHLY_COMPARISON[1].data;
+              const julCtr = jul.clicks / jul.uniqueViews;
+              const agoCtr = ago.clicks / ago.uniqueViews;
+              const julCvr = jul.conversions / jul.merchants;
+              const agoCvr = ago.conversions / ago.merchants;
+              const julGpv = jul.gpvPositive / jul.conversions;
+              const agoGpv = ago.gpvPositive / ago.conversions;
+
+              const rows: { label: string; jul: string; ago: string; d: { text: string; dir: 'up' | 'down' | 'flat' } }[] = [
+                { label: 'Views totales', jul: fmt(jul.views), ago: fmt(ago.views), d: delta(ago.views, jul.views) },
+                { label: 'Views únicos', jul: fmt(jul.uniqueViews), ago: fmt(ago.uniqueViews), d: delta(ago.uniqueViews, jul.uniqueViews) },
+                { label: 'Clicks únicos', jul: fmt(jul.clicks), ago: fmt(ago.clicks), d: delta(ago.clicks, jul.clicks) },
+                { label: 'CTR', jul: `${(julCtr * 100).toFixed(1)}%`, ago: `${(agoCtr * 100).toFixed(1)}%`, d: deltaPp(agoCtr * 100, julCtr * 100) },
+                { label: 'Merchants únicos impactados', jul: fmt(jul.merchants), ago: fmt(ago.merchants), d: delta(ago.merchants, jul.merchants) },
+                { label: 'Conversiones', jul: fmt(jul.conversions), ago: fmt(ago.conversions), d: delta(ago.conversions, jul.conversions) },
+                { label: 'CVR', jul: `${(julCvr * 100).toFixed(1)}%`, ago: `${(agoCvr * 100).toFixed(1)}%`, d: deltaPp(agoCvr * 100, julCvr * 100) },
+                { label: 'Conversiones con GPV > 0', jul: `${(julGpv * 100).toFixed(1)}%`, ago: `${(agoGpv * 100).toFixed(1)}%`, d: deltaPp(agoGpv * 100, julGpv * 100) },
+              ];
+
+              return rows.map((r) => (
+                <div className="mct-row" key={r.label}>
+                  <span className="mct-label">{r.label}</span>
+                  <span>{r.jul}</span>
+                  <span>{r.ago}</span>
+                  <span className={`mct-delta mct-${r.d.dir}`}>
+                    {r.d.dir === 'up' ? '▲' : r.d.dir === 'down' ? '▼' : '—'} {r.d.text}
+                  </span>
+                </div>
+              ));
+            })()}
+          </div>
+
+          <div className="mct-note">
+            Cada mes agrupa a los merchants por la primera vez que vieron cualquiera de los 3
+            triggers dentro de ese mes calendario (cohorte por mes), con la misma metodología de
+            dedup y atribución last-touch que el resto del tablero.
+            <br />
+            <strong>Sobre la caída de CVR en agosto:</strong> es esperable, no es una caída de
+            performance. La cohorte de agosto tuvo mucho menos tiempo para convertir al momento de
+            este corte (31 ago) que la de julio — a más días desde la exposición, más chance de que
+            el estado de Pago Nube ya haya cambiado.
+          </div>
+
+          <div className="campaign-grid mct-by-campaign">
+            {(['MP', 'PP', 'CPT'] as const).map((camp) => {
+              const jul = MONTHLY_COMPARISON[0].data.byCampaign[camp];
+              const ago = MONTHLY_COMPARISON[1].data.byCampaign[camp];
+              const meta = CAMPAIGNS.find((c) => c.id === camp.toLowerCase())!;
+              const julCvr = pct(jul.conversions, jul.uniqueViews);
+              const agoCvr = pct(ago.conversions, ago.uniqueViews);
+              return (
+                <div
+                  key={camp}
+                  className="campaign-card mct-mini-card"
+                  style={{ '--campaign-color': meta.color } as React.CSSProperties}
+                >
+                  <div className="cc-head">
+                    <span className="cc-tag">{meta.tag}</span>
+                  </div>
+                  <div className="cc-metric-row">
+                    <span className="m-label">Conversiones jul → ago</span>
+                    <span className="m-value">
+                      {fmt(jul.conversions)} → {fmt(ago.conversions)}
+                    </span>
+                  </div>
+                  <div className="cc-metric-row highlight">
+                    <span className="m-label">CVR jul → ago</span>
+                    <span className="m-value">
+                      {julCvr} → {agoCvr}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
 
         <section className="block container">
           <div className="section-title">
