@@ -137,17 +137,19 @@ function fmt(n: number) {
   return n.toLocaleString('es-AR');
 }
 
-function delta(current: number, previous: number) {
-  if (!previous) return { text: '—', dir: 'flat' as const };
+type DeltaDir = 'up' | 'down' | 'flat';
+
+function delta(current: number, previous: number): { text: string; dir: DeltaDir } {
+  if (!previous) return { text: '—', dir: 'flat' };
   const diff = ((current - previous) / previous) * 100;
-  const dir = diff > 0.5 ? 'up' : diff < -0.5 ? 'down' : 'flat';
+  const dir: DeltaDir = diff > 0.5 ? 'up' : diff < -0.5 ? 'down' : 'flat';
   const sign = diff > 0 ? '+' : '';
   return { text: `${sign}${diff.toFixed(1)}%`, dir };
 }
 
-function deltaPp(current: number, previous: number) {
+function deltaPp(current: number, previous: number): { text: string; dir: DeltaDir } {
   const diff = current - previous;
-  const dir = diff > 0.05 ? 'up' : diff < -0.05 ? 'down' : 'flat';
+  const dir: DeltaDir = diff > 0.05 ? 'up' : diff < -0.05 ? 'down' : 'flat';
   const sign = diff > 0 ? '+' : '';
   return { text: `${sign}${diff.toFixed(1)} pp`, dir };
 }
