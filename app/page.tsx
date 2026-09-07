@@ -12,6 +12,8 @@ type CampaignMetrics = {
   merchants: number;
   conversions: number;
   gpvPositive: number;
+  gpvAccumulated: number;
+  gmvAccumulated: number;
 };
 
 type Campaign = {
@@ -33,8 +35,8 @@ const CAMPAIGNS: Campaign[] = [
     url: '/admin/settings/payments · evento PN_Trigger_MP',
     color: '#0050c3',
     previewSrc: '/screenshots/mp.png',
-    all: { views: 9480, uniqueViews: 9310, clicks: 3986, merchants: 9310, conversions: 660, gpvPositive: 643 },
-    last30: { views: 3626, uniqueViews: 3605, clicks: 1537, merchants: 3605, conversions: 209, gpvPositive: 201 },
+    all: { views: 9480, uniqueViews: 9310, clicks: 3986, merchants: 9310, conversions: 660, gpvPositive: 643, gpvAccumulated: 828900197, gmvAccumulated: 1642135079 },
+    last30: { views: 3626, uniqueViews: 3605, clicks: 1537, merchants: 3605, conversions: 209, gpvPositive: 201, gpvAccumulated: 75560901, gmvAccumulated: 145709128 },
   },
   {
     id: 'pp',
@@ -43,8 +45,8 @@ const CAMPAIGNS: Campaign[] = [
     url: '/admin/settings/payments · evento PN_Trigger_PP',
     color: '#00b4e6',
     previewSrc: '/screenshots/pp.png',
-    all: { views: 4249, uniqueViews: 4145, clicks: 1061, merchants: 4145, conversions: 255, gpvPositive: 250 },
-    last30: { views: 1613, uniqueViews: 1607, clicks: 401, merchants: 1607, conversions: 79, gpvPositive: 76 },
+    all: { views: 4249, uniqueViews: 4145, clicks: 1061, merchants: 4145, conversions: 255, gpvPositive: 250, gpvAccumulated: 693610907, gmvAccumulated: 1367515085 },
+    last30: { views: 1613, uniqueViews: 1607, clicks: 401, merchants: 1607, conversions: 79, gpvPositive: 76, gpvAccumulated: 35517505, gmvAccumulated: 64334187 },
   },
   {
     id: 'cpt',
@@ -53,8 +55,8 @@ const CAMPAIGNS: Campaign[] = [
     url: '/admin/account/transaction-fees/ · evento PN_Trigger_CPT',
     color: '#953e91',
     previewSrc: '/screenshots/cpt.png',
-    all: { views: 12627, uniqueViews: 11426, clicks: 1945, merchants: 11426, conversions: 455, gpvPositive: 446 },
-    last30: { views: 4715, uniqueViews: 4631, clicks: 745, merchants: 4631, conversions: 130, gpvPositive: 126 },
+    all: { views: 12627, uniqueViews: 11426, clicks: 1945, merchants: 11426, conversions: 455, gpvPositive: 446, gpvAccumulated: 1867290538, gmvAccumulated: 8471992182 },
+    last30: { views: 4715, uniqueViews: 4631, clicks: 745, merchants: 4631, conversions: 130, gpvPositive: 126, gpvAccumulated: 393797072, gmvAccumulated: 2889923749 },
   },
 ];
 
@@ -137,6 +139,11 @@ function fmt(n: number) {
   return n.toLocaleString('es-AR');
 }
 
+function fmtCurrency(n: number) {
+  const millones = n / 1_000_000;
+  return `$${millones.toLocaleString('es-AR', { maximumFractionDigits: 1 })}M`;
+}
+
 type DeltaDir = 'up' | 'down' | 'flat';
 
 function delta(current: number, previous: number): { text: string; dir: DeltaDir } {
@@ -165,11 +172,14 @@ export default function Page() {
     merchants: GENERAL_MERCHANTS_DEDUP[period],
     conversions: GENERAL_CONVERSIONS_DEDUP[period],
     gpvPositive: sum(period, 'gpvPositive'),
+    gpvAccumulated: sum(period, 'gpvAccumulated'),
+    gmvAccumulated: sum(period, 'gmvAccumulated'),
   };
 
   const ctr = pct(totals.clicks, totals.uniqueViews);
   const cvr = pct(totals.conversions, totals.merchants);
   const gpvShare = pct(totals.gpvPositive, totals.conversions);
+  const gpvOfGmv = pct(totals.gpvAccumulated, totals.gmvAccumulated);
 
   const periodLabel = period === 'all' ? 'All time (9 jun – 31 ago 2026)' : 'Últimos 30 días';
 
@@ -263,6 +273,16 @@ export default function Page() {
               <div className="sub">{fmt(totals.gpvPositive)} de {fmt(totals.conversions)} conversiones venden</div>
             </div>
             <div className="kpi-card">
+              <div className="label">GPV generado desde la activación</div>
+              <div className="value accent">{fmtCurrency(totals.gpvAccumulated)}</div>
+              <div className="sub">Acumulado vía Pago Nube desde que activaron</div>
+            </div>
+            <div className="kpi-card">
+              <div className="label">GMV total de esas tiendas</div>
+              <div className="value">{fmtCurrency(totals.gmvAccumulated)}</div>
+              <div className="sub">Pago Nube es {gpvOfGmv} de su GMV total (90d)</div>
+            </div>
+            <div className="kpi-card">
               <div className="label">Comunicaciones activas</div>
               <div className="value">3</div>
               <div className="sub">MP · PP · CPT</div>
@@ -329,6 +349,16 @@ export default function Page() {
                     <span className="m-label">Con GPV &gt; 0 (30d)</span>
                     <span className="m-value">
                       {fmt(m.gpvPositive)} ({pct(m.gpvPositive, m.conversions)})
+                    </span>
+                  </div>
+                  <div className="cc-metric-row">
+                    <span className="m-label">GPV desde activación</span>
+                    <span className="m-value">{fmtCurrency(m.gpvAccumulated)}</span>
+                  </div>
+                  <div className="cc-metric-row">
+                    <span className="m-label">GMV total (esas tiendas)</span>
+                    <span className="m-value">
+                      {fmtCurrency(m.gmvAccumulated)} ({pct(m.gpvAccumulated, m.gmvAccumulated)})
                     </span>
                   </div>
                   <div className="cc-metric-row highlight">
@@ -529,6 +559,23 @@ export default function Page() {
                 Nube.
               </span>
             </div>
+            <div className="insight-item">
+              <span className="bullet">8</span>
+              <span className="txt">
+                <strong>Los merchants que activaron generaron ~$3.390M en GPV vía Pago Nube desde
+                que activaron</strong> (ventana de 90 días, que cubre todo el período de la campaña).
+                CPT lidera en GPV total ($1.867M) a pesar de tener el CVR más bajo — su volumen de
+                conversiones (455) más que compensa la tasa de conversión menor.
+              </span>
+            </div>
+            <div className="insight-item">
+              <span className="bullet">9</span>
+              <span className="txt">
+                <strong>Pago Nube representa el 29,5% del GMV total de esos merchants</strong> ($3.390M
+                de GPV sobre $11.482M de GMV total en los últimos 90 días). Todavía hay margen: 7
+                de cada 10 pesos que venden estos merchants siguen pasando por otros medios de pago.
+              </span>
+            </div>
           </div>
         </section>
       </main>
@@ -573,6 +620,22 @@ export default function Page() {
               (Gross Payment Volume) mayor a $0 en los últimos 30 días (<code>gpv_30d_fintech</code>,
               HubSpot). Sirve como chequeo de calidad — confirma que la activación se tradujo en uso
               real, no solo en un cambio de estado.
+            </li>
+            <li>
+              <strong>GPV generado desde la activación:</strong> suma del <code>gpv_90d_fintech</code>{' '}
+              (HubSpot) de cada merchant convertido. Como la campaña arrancó el 9 de junio (menos de
+              90 días antes de este corte), la ventana de 90 días cubre todo el período desde la
+              activación de cada merchant — antes de activar, el GPV vía Pago Nube era $0, así que
+              no hay doble conteo. Es GPV total de la tienda vía Pago Nube, no aislado 100% al
+              efecto del trigger si el merchant ya usaba el medio de pago en otro contexto.
+            </li>
+            <li>
+              <strong>GMV total de esas tiendas:</strong> ventas totales (todos los medios de pago)
+              de los merchants convertidos en los últimos 90 días, desde NuvemLens
+              (<code>orders_gmv_store_daily</code>). Sirve de contexto para el GPV: cuánto de la
+              facturación de esos merchants ya pasa por Pago Nube vs. otros medios. 92 de los 1.370
+              merchants no tuvieron ventas registradas en la ventana (probablemente muy nuevos o sin
+              actividad reciente).
             </li>
             <li>
               Limitación conocida: la fecha de "última actualización de estado" no siempre refleja
