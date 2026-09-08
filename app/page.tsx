@@ -593,17 +593,6 @@ export default function Page() {
                 cada uno). Por campaña: PP 64,9%, MP 57,5%, CPT 52,2%.
               </span>
             </div>
-            <div className="insight-item">
-              <span className="bullet">10</span>
-              <span className="txt">
-                <strong>El GPV de PP se corrigió por contaminación de reactivaciones previas</strong>:
-                de los 82 merchants "comeback/phoenix" de PP, 37 tenían GPV mayor a su propio GMV
-                desde activación — imposible si el período fuera el mismo, y señal de que ya
-                facturaban con Pago Nube antes de la fecha de reactivación registrada. Se excluyó
-                ese $ (no las conversiones, que siguen siendo 255) del cálculo de PP, bajando su
-                ratio de 82,4% a 64,9%.
-              </span>
-            </div>
           </div>
         </section>
       </main>
