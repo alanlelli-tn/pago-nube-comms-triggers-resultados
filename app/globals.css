@@ -396,6 +396,12 @@ section.block {
   color: var(--campaign-color, var(--blue));
 }
 
+.campaign-card .cc-metric-row .m-value-usd {
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--grey-mid);
+}
+
 /* ---------- Insights ---------- */
 .insights-panel {
   background: linear-gradient(180deg, rgba(0, 80, 195, 0.06) 0%, rgba(0, 80, 195, 0.02) 100%);
