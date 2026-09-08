@@ -362,17 +362,20 @@ export default function Page() {
                       {fmt(m.gpvPositive)} ({pct(m.gpvPositive, m.conversions)})
                     </span>
                   </div>
-                  <div className="cc-metric-row">
+                  <div className="cc-metric-row cc-metric-row-stack">
                     <span className="m-label">GPV desde activación</span>
-                    <span className="m-value">
-                      {fmtCurrency(m.gpvAccumulated)} <span className="m-value-usd">{fmtUSD(m.gpvAccumulated)}</span>
+                    <span className="m-value-block">
+                      <span className="m-value">{fmtCurrency(m.gpvAccumulated)}</span>
+                      <span className="m-value-usd">{fmtUSD(m.gpvAccumulated)}</span>
                     </span>
                   </div>
-                  <div className="cc-metric-row">
+                  <div className="cc-metric-row cc-metric-row-stack">
                     <span className="m-label">GMV desde activación</span>
-                    <span className="m-value">
-                      {fmtCurrency(m.gmvAccumulated)} <span className="m-value-usd">{fmtUSD(m.gmvAccumulated)}</span>{' '}
-                      ({pct(m.gpvAccumulated, m.gmvAccumulated)})
+                    <span className="m-value-block">
+                      <span className="m-value">{fmtCurrency(m.gmvAccumulated)}</span>
+                      <span className="m-value-usd">
+                        {fmtUSD(m.gmvAccumulated)} ({pct(m.gpvAccumulated, m.gmvAccumulated)})
+                      </span>
                     </span>
                   </div>
                   <div className="cc-metric-row highlight">
