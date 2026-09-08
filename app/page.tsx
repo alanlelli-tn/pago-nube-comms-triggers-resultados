@@ -35,8 +35,8 @@ const CAMPAIGNS: Campaign[] = [
     url: '/admin/settings/payments · evento PN_Trigger_MP',
     color: '#0050c3',
     previewSrc: '/screenshots/mp.png',
-    all: { views: 9480, uniqueViews: 9310, clicks: 3986, merchants: 9310, conversions: 660, gpvPositive: 643, gpvAccumulated: 828900197, gmvAccumulated: 1642135079 },
-    last30: { views: 3626, uniqueViews: 3605, clicks: 1537, merchants: 3605, conversions: 209, gpvPositive: 201, gpvAccumulated: 75560901, gmvAccumulated: 145709128 },
+    all: { views: 9480, uniqueViews: 9310, clicks: 3986, merchants: 9310, conversions: 660, gpvPositive: 643, gpvAccumulated: 828900197, gmvAccumulated: 1441639783 },
+    last30: { views: 3626, uniqueViews: 3605, clicks: 1537, merchants: 3605, conversions: 209, gpvPositive: 201, gpvAccumulated: 75560901, gmvAccumulated: 135207409 },
   },
   {
     id: 'pp',
@@ -45,8 +45,8 @@ const CAMPAIGNS: Campaign[] = [
     url: '/admin/settings/payments · evento PN_Trigger_PP',
     color: '#00b4e6',
     previewSrc: '/screenshots/pp.png',
-    all: { views: 4249, uniqueViews: 4145, clicks: 1061, merchants: 4145, conversions: 255, gpvPositive: 250, gpvAccumulated: 693610907, gmvAccumulated: 1367515085 },
-    last30: { views: 1613, uniqueViews: 1607, clicks: 401, merchants: 1607, conversions: 79, gpvPositive: 76, gpvAccumulated: 35517505, gmvAccumulated: 64334187 },
+    all: { views: 4249, uniqueViews: 4145, clicks: 1061, merchants: 4145, conversions: 255, gpvPositive: 250, gpvAccumulated: 693610907, gmvAccumulated: 841763341 },
+    last30: { views: 1613, uniqueViews: 1607, clicks: 401, merchants: 1607, conversions: 79, gpvPositive: 76, gpvAccumulated: 35517505, gmvAccumulated: 53373123 },
   },
   {
     id: 'cpt',
@@ -55,8 +55,8 @@ const CAMPAIGNS: Campaign[] = [
     url: '/admin/account/transaction-fees/ · evento PN_Trigger_CPT',
     color: '#953e91',
     previewSrc: '/screenshots/cpt.png',
-    all: { views: 12627, uniqueViews: 11426, clicks: 1945, merchants: 11426, conversions: 455, gpvPositive: 446, gpvAccumulated: 1867290538, gmvAccumulated: 8471992182 },
-    last30: { views: 4715, uniqueViews: 4631, clicks: 745, merchants: 4631, conversions: 130, gpvPositive: 126, gpvAccumulated: 393797072, gmvAccumulated: 2889923749 },
+    all: { views: 12627, uniqueViews: 11426, clicks: 1945, merchants: 11426, conversions: 455, gpvPositive: 446, gpvAccumulated: 1867290538, gmvAccumulated: 3578122185 },
+    last30: { views: 4715, uniqueViews: 4631, clicks: 745, merchants: 4631, conversions: 130, gpvPositive: 126, gpvAccumulated: 393797072, gmvAccumulated: 825614160 },
   },
 ];
 
@@ -278,9 +278,9 @@ export default function Page() {
               <div className="sub">Acumulado vía Pago Nube desde que activaron</div>
             </div>
             <div className="kpi-card">
-              <div className="label">GMV total de esas tiendas</div>
+              <div className="label">GMV desde activación</div>
               <div className="value">{fmtCurrency(totals.gmvAccumulated)}</div>
-              <div className="sub">Pago Nube es {gpvOfGmv} de su GMV total (90d)</div>
+              <div className="sub">Pago Nube es {gpvOfGmv} de su GMV desde que activaron</div>
             </div>
             <div className="kpi-card">
               <div className="label">Comunicaciones activas</div>
@@ -356,7 +356,7 @@ export default function Page() {
                     <span className="m-value">{fmtCurrency(m.gpvAccumulated)}</span>
                   </div>
                   <div className="cc-metric-row">
-                    <span className="m-label">GMV total (esas tiendas)</span>
+                    <span className="m-label">GMV desde activación</span>
                     <span className="m-value">
                       {fmtCurrency(m.gmvAccumulated)} ({pct(m.gpvAccumulated, m.gmvAccumulated)})
                     </span>
@@ -571,9 +571,10 @@ export default function Page() {
             <div className="insight-item">
               <span className="bullet">9</span>
               <span className="txt">
-                <strong>Pago Nube representa el 29,5% del GMV total de esos merchants</strong> ($3.390M
-                de GPV sobre $11.482M de GMV total en los últimos 90 días). Todavía hay margen: 7
-                de cada 10 pesos que venden estos merchants siguen pasando por otros medios de pago.
+                <strong>Pago Nube ya representa el 57,8% del GMV de esos merchants desde que activaron</strong>{' '}
+                ($3.390M de GPV sobre $5.862M de GMV, medido desde la fecha real de activación de
+                cada uno, no una ventana fija). Por campaña: PP 82,4%, MP 57,5%, CPT 52,2% — en los
+                tres casos, Pago Nube ya es la mayoría del negocio de estos merchants.
               </span>
             </div>
           </div>
@@ -630,12 +631,21 @@ export default function Page() {
               efecto del trigger si el merchant ya usaba el medio de pago en otro contexto.
             </li>
             <li>
-              <strong>GMV total de esas tiendas:</strong> ventas totales (todos los medios de pago)
-              de los merchants convertidos en los últimos 90 días, desde NuvemLens
-              (<code>orders_gmv_store_daily</code>). Sirve de contexto para el GPV: cuánto de la
-              facturación de esos merchants ya pasa por Pago Nube vs. otros medios. 92 de los 1.370
-              merchants no tuvieron ventas registradas en la ventana (probablemente muy nuevos o sin
+              <strong>GMV desde activación:</strong> ventas totales (todos los medios de pago) de
+              cada merchant convertido, sumadas desde su fecha real de activación (no una ventana
+              fija) hasta hoy — mismo criterio temporal que el GPV, para que la comparación entre
+              ambos sea justa. Fuente: NuvemLens (<code>orders_gmv_store_daily</code>), cruzado por
+              store_id contra la fecha de activación de cada merchant. 92 de los 1.370 merchants no
+              tuvieron ventas registradas desde que activaron (probablemente muy nuevos o sin
               actividad reciente).
+            </li>
+            <li>
+              <strong>Corrección de metodología (importante):</strong> una versión anterior de este
+              número usaba una ventana fija de 90 días para todos los merchants por igual. Como el
+              53% de los merchants activó recién en los últimos 30 días, esa ventana fija incluía
+              muchos días de ventas <em>previas</em> a la activación (vía otros medios de pago), lo
+              que inflaba el GMV y subestimaba el % de Pago Nube (mostraba 29,5% en vez del 57,8%
+              real). Se corrigió anclando el GMV a la fecha de activación real de cada merchant.
             </li>
             <li>
               Limitación conocida: la fecha de "última actualización de estado" no siempre refleja
