@@ -144,6 +144,17 @@ function fmtCurrency(n: number) {
   return `$${millones.toLocaleString('es-AR', { maximumFractionDigits: 1 })}M`;
 }
 
+// Cotización dólar mayorista de referencia: $1.510 ARS/USD (8 sep 2026, BCRA Com. "A" 3500).
+// Se usa el mayorista (no blue/tarjeta) por ser el estándar para reportes de negocio.
+// El GPV/GMV son en pesos (moneda real de la operación) — el USD es solo referencia,
+// y se mueve con el tipo de cambio, que en Argentina es volátil.
+const ARS_PER_USD = 1510;
+
+function fmtUSD(n: number) {
+  const millonesUsd = n / ARS_PER_USD / 1_000_000;
+  return `US$${millonesUsd.toLocaleString('es-AR', { maximumFractionDigits: 2 })}M`;
+}
+
 type DeltaDir = 'up' | 'down' | 'flat';
 
 function delta(current: number, previous: number): { text: string; dir: DeltaDir } {
@@ -275,12 +286,12 @@ export default function Page() {
             <div className="kpi-card">
               <div className="label">GPV generado desde la activación</div>
               <div className="value accent">{fmtCurrency(totals.gpvAccumulated)}</div>
-              <div className="sub">Acumulado vía Pago Nube desde que activaron</div>
+              <div className="sub">{fmtUSD(totals.gpvAccumulated)} · Acumulado vía Pago Nube desde que activaron</div>
             </div>
             <div className="kpi-card">
               <div className="label">GMV desde activación</div>
               <div className="value">{fmtCurrency(totals.gmvAccumulated)}</div>
-              <div className="sub">Pago Nube es {gpvOfGmv} de su GMV desde que activaron</div>
+              <div className="sub">{fmtUSD(totals.gmvAccumulated)} · Pago Nube es {gpvOfGmv} de su GMV</div>
             </div>
             <div className="kpi-card">
               <div className="label">Comunicaciones activas</div>
@@ -353,12 +364,15 @@ export default function Page() {
                   </div>
                   <div className="cc-metric-row">
                     <span className="m-label">GPV desde activación</span>
-                    <span className="m-value">{fmtCurrency(m.gpvAccumulated)}</span>
+                    <span className="m-value">
+                      {fmtCurrency(m.gpvAccumulated)} <span className="m-value-usd">{fmtUSD(m.gpvAccumulated)}</span>
+                    </span>
                   </div>
                   <div className="cc-metric-row">
                     <span className="m-label">GMV desde activación</span>
                     <span className="m-value">
-                      {fmtCurrency(m.gmvAccumulated)} ({pct(m.gpvAccumulated, m.gmvAccumulated)})
+                      {fmtCurrency(m.gmvAccumulated)} <span className="m-value-usd">{fmtUSD(m.gmvAccumulated)}</span>{' '}
+                      ({pct(m.gpvAccumulated, m.gmvAccumulated)})
                     </span>
                   </div>
                   <div className="cc-metric-row highlight">
@@ -646,6 +660,13 @@ export default function Page() {
               muchos días de ventas <em>previas</em> a la activación (vía otros medios de pago), lo
               que inflaba el GMV y subestimaba el % de Pago Nube (mostraba 29,5% en vez del 57,8%
               real). Se corrigió anclando el GMV a la fecha de activación real de cada merchant.
+            </li>
+            <li>
+              <strong>Equivalente en USD:</strong> se muestra como referencia junto a cada monto en
+              pesos, usando el dólar mayorista de $1.510 ARS/USD (BCRA Com. "A" 3500, 8 sep 2026) —
+              no el blue ni el tarjeta. El negocio real ocurre en pesos; el USD es solo para dar
+              contexto y se mueve con el tipo de cambio, que en Argentina es volátil. No se
+              actualiza automáticamente con cada refresh del tablero.
             </li>
             <li>
               Limitación conocida: la fecha de "última actualización de estado" no siempre refleja
