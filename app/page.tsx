@@ -45,7 +45,7 @@ const CAMPAIGNS: Campaign[] = [
     url: '/admin/settings/payments · evento PN_Trigger_PP',
     color: '#00b4e6',
     previewSrc: '/screenshots/pp.png',
-    all: { views: 4249, uniqueViews: 4145, clicks: 1061, merchants: 4145, conversions: 255, gpvPositive: 250, gpvAccumulated: 693610907, gmvAccumulated: 841763341 },
+    all: { views: 4249, uniqueViews: 4145, clicks: 1061, merchants: 4145, conversions: 255, gpvPositive: 250, gpvAccumulated: 454392434, gmvAccumulated: 699930920 },
     last30: { views: 1613, uniqueViews: 1607, clicks: 401, merchants: 1607, conversions: 79, gpvPositive: 76, gpvAccumulated: 35517505, gmvAccumulated: 53373123 },
   },
   {
@@ -588,10 +588,20 @@ export default function Page() {
             <div className="insight-item">
               <span className="bullet">9</span>
               <span className="txt">
-                <strong>Pago Nube ya representa el 57,8% del GMV de esos merchants desde que activaron</strong>{' '}
-                ($3.390M de GPV sobre $5.862M de GMV, medido desde la fecha real de activación de
-                cada uno, no una ventana fija). Por campaña: PP 82,4%, MP 57,5%, CPT 52,2% — en los
-                tres casos, Pago Nube ya es la mayoría del negocio de estos merchants.
+                <strong>Pago Nube ya representa el 55,1% del GMV de esos merchants desde que activaron</strong>{' '}
+                ($3.151M de GPV sobre $5.720M de GMV, medido desde la fecha real de activación de
+                cada uno). Por campaña: PP 64,9%, MP 57,5%, CPT 52,2%.
+              </span>
+            </div>
+            <div className="insight-item">
+              <span className="bullet">10</span>
+              <span className="txt">
+                <strong>El GPV de PP se corrigió por contaminación de reactivaciones previas</strong>:
+                de los 82 merchants "comeback/phoenix" de PP, 37 tenían GPV mayor a su propio GMV
+                desde activación — imposible si el período fuera el mismo, y señal de que ya
+                facturaban con Pago Nube antes de la fecha de reactivación registrada. Se excluyó
+                ese $ (no las conversiones, que siguen siendo 255) del cálculo de PP, bajando su
+                ratio de 82,4% a 64,9%.
               </span>
             </div>
           </div>
@@ -661,8 +671,20 @@ export default function Page() {
               número usaba una ventana fija de 90 días para todos los merchants por igual. Como el
               53% de los merchants activó recién en los últimos 30 días, esa ventana fija incluía
               muchos días de ventas <em>previas</em> a la activación (vía otros medios de pago), lo
-              que inflaba el GMV y subestimaba el % de Pago Nube (mostraba 29,5% en vez del 57,8%
+              que inflaba el GMV y subestimaba el % de Pago Nube (mostraba 29,5% en vez del ~55%
               real). Se corrigió anclando el GMV a la fecha de activación real de cada merchant.
+            </li>
+            <li>
+              <strong>Corrección adicional en PP (reactivaciones contaminadas):</strong> dentro de
+              PP, 82 de las 255 conversiones son reactivaciones ("comeback"/"phoenix" en HubSpot),
+              no primeras activaciones. De esas 82, 37 tenían GPV mayor a su propio GMV desde
+              activación — matemáticamente imposible si midieran el mismo período, y evidencia de
+              que ya facturaban con Pago Nube antes de la fecha de reactivación registrada. Se
+              excluyó el $ de esos 37 casos (las conversiones siguen siendo 255; solo se ajustó el
+              GPV/GMV atribuido), bajando el ratio de PP de 82,4% a 64,9%. Esta corrección hoy solo
+              se aplicó a PP — MP y CPT también tienen merchants en reactivación (62 y 96
+              respectivamente) que podrían tener el mismo sesgo en menor proporción, pendiente de
+              revisar si se necesita la misma precisión.
             </li>
             <li>
               <strong>Equivalente en USD:</strong> se muestra como referencia junto a cada monto en
