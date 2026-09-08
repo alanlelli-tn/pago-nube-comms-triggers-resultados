@@ -35,7 +35,7 @@ const CAMPAIGNS: Campaign[] = [
     url: '/admin/settings/payments · evento PN_Trigger_MP',
     color: '#0050c3',
     previewSrc: '/screenshots/mp.png',
-    all: { views: 9480, uniqueViews: 9310, clicks: 3986, merchants: 9310, conversions: 660, gpvPositive: 643, gpvAccumulated: 828900197, gmvAccumulated: 1441639783 },
+    all: { views: 9480, uniqueViews: 9310, clicks: 3986, merchants: 9310, conversions: 660, gpvPositive: 643, gpvAccumulated: 812741184, gmvAccumulated: 1431480333 },
     last30: { views: 3626, uniqueViews: 3605, clicks: 1537, merchants: 3605, conversions: 209, gpvPositive: 201, gpvAccumulated: 75560901, gmvAccumulated: 135207409 },
   },
   {
@@ -55,7 +55,7 @@ const CAMPAIGNS: Campaign[] = [
     url: '/admin/account/transaction-fees/ · evento PN_Trigger_CPT',
     color: '#953e91',
     previewSrc: '/screenshots/cpt.png',
-    all: { views: 12627, uniqueViews: 11426, clicks: 1945, merchants: 11426, conversions: 455, gpvPositive: 446, gpvAccumulated: 1867290538, gmvAccumulated: 3578122185 },
+    all: { views: 12627, uniqueViews: 11426, clicks: 1945, merchants: 11426, conversions: 455, gpvPositive: 446, gpvAccumulated: 1556604398, gmvAccumulated: 3320780483 },
     last30: { views: 4715, uniqueViews: 4631, clicks: 745, merchants: 4631, conversions: 130, gpvPositive: 126, gpvAccumulated: 393797072, gmvAccumulated: 825614160 },
   },
 ];
@@ -588,9 +588,10 @@ export default function Page() {
             <div className="insight-item">
               <span className="bullet">9</span>
               <span className="txt">
-                <strong>Pago Nube ya representa el 55,1% del GMV de esos merchants desde que activaron</strong>{' '}
-                ($3.151M de GPV sobre $5.720M de GMV, medido desde la fecha real de activación de
-                cada uno). Por campaña: PP 64,9%, MP 57,5%, CPT 52,2%.
+                <strong>Pago Nube ya representa el 51,8% del GMV de esos merchants desde que activaron</strong>{' '}
+                ($2.824M de GPV sobre $5.452M de GMV, medido desde la fecha real de activación de
+                cada uno, con los $ de reactivaciones contaminadas excluidos en las 3 campañas). Por
+                campaña: PP 64,9%, MP 56,8%, CPT 46,9%.
               </span>
             </div>
           </div>
@@ -660,20 +661,20 @@ export default function Page() {
               número usaba una ventana fija de 90 días para todos los merchants por igual. Como el
               53% de los merchants activó recién en los últimos 30 días, esa ventana fija incluía
               muchos días de ventas <em>previas</em> a la activación (vía otros medios de pago), lo
-              que inflaba el GMV y subestimaba el % de Pago Nube (mostraba 29,5% en vez del ~55%
+              que inflaba el GMV y subestimaba el % de Pago Nube (mostraba 29,5% en vez del ~52%
               real). Se corrigió anclando el GMV a la fecha de activación real de cada merchant.
             </li>
             <li>
-              <strong>Corrección adicional en PP (reactivaciones contaminadas):</strong> dentro de
-              PP, 82 de las 255 conversiones son reactivaciones ("comeback"/"phoenix" en HubSpot),
-              no primeras activaciones. De esas 82, 37 tenían GPV mayor a su propio GMV desde
-              activación — matemáticamente imposible si midieran el mismo período, y evidencia de
-              que ya facturaban con Pago Nube antes de la fecha de reactivación registrada. Se
-              excluyó el $ de esos 37 casos (las conversiones siguen siendo 255; solo se ajustó el
-              GPV/GMV atribuido), bajando el ratio de PP de 82,4% a 64,9%. Esta corrección hoy solo
-              se aplicó a PP — MP y CPT también tienen merchants en reactivación (62 y 96
-              respectivamente) que podrían tener el mismo sesgo en menor proporción, pendiente de
-              revisar si se necesita la misma precisión.
+              <strong>Corrección por reactivaciones contaminadas (las 3 campañas):</strong> dentro
+              de cada campaña, algunas conversiones son reactivaciones ("comeback"/"phoenix" en
+              HubSpot), no primeras activaciones. Para cada una, se comparó su GPV individual
+              contra su propio GMV desde activación: si el GPV superaba el GMV —matemáticamente
+              imposible si midieran el mismo período— es evidencia de que el merchant ya facturaba
+              con Pago Nube antes de la fecha de reactivación registrada, y se excluyó ese $ del
+              cálculo (las conversiones no cambian, solo el GPV/GMV atribuido). Reactivaciones
+              contaminadas encontradas: PP 37 de 82 (45%), MP 36 de 62 (58%), CPT 27 de 96 (28%).
+              Esto bajó el ratio de PP de 82,4% a 64,9%, el de MP de 57,5% a 56,8%, y el de CPT de
+              52,2% a 46,9%.
             </li>
             <li>
               <strong>Equivalente en USD:</strong> se muestra como referencia junto a cada monto en
